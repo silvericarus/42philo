@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:31:42 by albgonza          #+#    #+#             */
-/*   Updated: 2023/04/24 19:26:59 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/04 21:04:54 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,16 @@ long long	get_time(void)
 	struct timeval	time;
 
 	gettimeofday(&time, NULL);
-	return (time.tv_sec * 1000 + time.tv_usec / 1000);
+	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+}
+
+void	ft_usleep(long long ms)
+{
+	long long	time;
+
+	time = get_time();
+	while ((get_time() - time) < ms)
+		usleep(5);
 }
 
 void	philo_test(char *str, t_philo *philo)
@@ -50,14 +59,18 @@ void	*philo_main_loop(void *philo)
 {
 	t_philo		*tphilo;
 	int			turns;
+	long long	alarm;
+	long long	die_alarm;
 
 	tphilo = philo;
 	tphilo->actual_time = 0;
+	die_alarm = get_time() + tphilo->main_philo->die_time;
 	(void) turns;
-
-	while (1)
+	while (tphilo->main_philo->playing)
 	{
-		if (!tphilo->left_fork.taken && !tphilo->right_fork.taken)
+		if (!tphilo->left_fork.taken && !tphilo->right_fork.taken
+			&& tphilo->status == THINKING
+			&& tphilo->main_philo->num_of_philos > 1)
 		{
 			tphilo->left_fork.taken = 1;
 			philo_print("%lld %d has taken a fork\n", tphilo);
@@ -69,36 +82,43 @@ void	*philo_main_loop(void *philo)
 		}
 		else if (tphilo->left_fork.taken || tphilo->right_fork.taken)
 		{
-			philo_print("%lld %d is thinking\n", tphilo);
 			tphilo->status = THINKING;
 		}
 		if (tphilo->status == EATING)
 		{
- 			tphilo->time_since_last_meal = 0;
+			die_alarm = get_time() + tphilo->main_philo->die_time;
 			philo_print("%lld %d is eating\n", tphilo);
 			pthread_mutex_unlock(tphilo->left_fork.f_mutex);
 			pthread_mutex_unlock(tphilo->right_fork.f_mutex);
 			tphilo->left_fork.taken = 0;
 			tphilo->right_fork.taken = 0;
+			ft_usleep(tphilo->main_philo->eat_time);
 			tphilo->status = SLEEPING;
-			philo_print("%lld %d is sleeping\n", tphilo);
 		}
-		else if (tphilo->status == SLEEPING)
+		if (tphilo->status == SLEEPING)
 		{
-			
+			if (tphilo->main_philo->playing)
+				philo_print("%lld %d is sleeping\n", tphilo);
+			alarm = get_time() + tphilo->main_philo->sleep_time;
+			while (tphilo->actual_time <= alarm)
+			{
+				ft_usleep(10);
+				tphilo->actual_time = get_time();
+				if (!tphilo->main_philo->playing)
+					break ;
+			}
+			tphilo->status = THINKING;
 		}
-		
-		/* 
-			Comprobar que para tomar los tenedores el
-			filosofo debe estar en un estado que no sea SLEEPING, también
-			comprobar porqué no se suman los ms al contador. Los impares 
-			inician en estado SLEEPING y los pares en estado THINKING, esto produce 
-			que sólo los pares coman, haciendo que los impares no coman nunca, 
-			aunque cojan los tenedores que le tocan. Quizás la solución es
-			contar el tiempo que están durmiendo los impares, y entonces
-			pasan a estado THINKING, teniendo posible el coger
-			los tenedores y comer.
-		 */
+		if (tphilo->status == THINKING && tphilo->main_philo->playing)
+		{
+			philo_print("%lld %d is thinking\n", tphilo);
+		}
+		if (tphilo->actual_time > die_alarm)
+		{
+			tphilo->main_philo->playing = 0;
+			philo_print("%lld %d died\n", tphilo);
+		}
+		tphilo->actual_time = get_time();
 	}
 	return (NULL);
 }
@@ -108,13 +128,10 @@ void	*time_management(t_main *main)
 	t_main		*rmain;
 	int			turns;
 	int			i;
-	/* long long	newtime;
-	long long	time; */
 
 	turns = 0;
 	rmain = main;
 	i = 0;
-	// time = get_time();
 	while (i < rmain->num_of_philos)
 	{
 		if (pthread_create(&rmain->table[i].thread, NULL,
@@ -128,53 +145,6 @@ void	*time_management(t_main *main)
 		if (pthread_join(rmain->table[i].thread, NULL))
 			printf("error joining thread\n");
 		i++;
-	}
-	while (rmain->playing && turns < rmain->turns)
-	{
-		/* while (i < rmain->num_of_philos)
-		{
-			newtime = get_time();
-			rmain->table[i].actual_time += newtime - time;
-			if (rmain->table[i].status == EATING)
-			{
-				rmain->table[i]
-					.time_since_last_meal = 0;
-				philo_print("%lld %d is sleeping\n", &rmain->table[i]);
-				rmain->table[i].status = SLEEPING;
-			}
-			else if (!rmain->table[i].left_fork.taken
-				&& !rmain->table[i].right_fork.taken)
-			{
-				pthread_mutex_lock(rmain->table[i].left_fork.f_mutex);
-				pthread_mutex_lock(rmain->table[i].right_fork.f_mutex);
-				rmain->table[i].left_fork.taken = 1;
-				rmain->table[i].right_fork.taken = 1;
-				philo_print("%lld %d is eating\n", &rmain->table[i]);
-				rmain->table[i].status = EATING;
-				while (rmain->table[i].status == EATING)
-				{
-					newtime = get_time();
-					rmain->table[i].actual_time += newtime - time;
-					rmain->table[i].time_since_last_meal
-						+= rmain->table[i].actual_time;
-					if (rmain->table[i].time_since_last_meal > rmain->die_time)
-					{
-						rmain->playing = 0;
-						philo_print("%lld %d died\n", &rmain->table[i]);
-						pthread_mutex_unlock(rmain->table[i].left_fork.f_mutex);
-						pthread_mutex_unlock(rmain
-							->table[i].right_fork.f_mutex);
-						break ;
-					}
-				}
-			}
-			else
-			{
-				philo_print("%lld %d is thinking\n", &rmain->table[i]);
-				rmain->table[i].status = THINKING;
-			}
-			i++; 
-		}*/
 	}
 	return (NULL);
 }
@@ -218,12 +188,10 @@ void	create_philos(t_main *main)
 		p.id = i + 1;
 		p.main_philo = (struct s_main *)main;
 		p.start_eating = get_time();
-		p.main_philo->forks_mutexes[i].f_mutex = malloc(sizeof(pthread_mutex_t *));
+		p.main_philo->forks_mutexes[i].f_mutex
+			= malloc(sizeof(pthread_mutex_t *));
 		p.left_fork = main->forks_mutexes[i];
-		if (i != 0)
-			p.right_fork = main->forks_mutexes[i - 1];
-		else
-			p.right_fork = main->forks_mutexes[main->num_of_philos - 1];
+		p.right_fork = main->forks_mutexes[i % main->num_of_philos];
 		p.time_since_last_meal = 0;
 		main->table[i] = p;
 		main->forks_mutexes[i].f_mutex = malloc(sizeof(pthread_mutex_t));

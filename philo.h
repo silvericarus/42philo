@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:32:07 by albgonza          #+#    #+#             */
-/*   Updated: 2023/04/24 19:15:37 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/08 20:07:29 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,17 @@ typedef struct s_main
 	int					loop_mode;
 	int					playing;
 	long long			initial_time;
+	pthread_mutex_t		*died_print_m;
+	int					died_printed;
 }	t_main;
 
-int		ft_atoi(const char *str);
-int		ft_isdigit(int str);
-void	print_table(t_main *main);
+//utils.c
+int			ft_atoi(const char *str);
+int			ft_isdigit(int str);
+long long	get_time(void);
+void		ft_usleep(long long ms);
+void		philo_print(char *str, t_philo *philo);
+//loop_split.c
+void		ft_free(t_main *main);
 
 #endif

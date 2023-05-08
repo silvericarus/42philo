@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/24 19:10:06 by albgonza          #+#    #+#             */
-/*   Updated: 2023/01/24 19:17:45 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/08 19:32:15 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,4 +45,46 @@ int	ft_atoi(const char *str)
 		i++;
 	}
 	return (num * neg);
+}
+
+long long	get_time(void)
+{
+	struct timeval	time;
+
+	gettimeofday(&time, NULL);
+	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+}
+
+void	ft_usleep(long long ms)
+{
+	long long	time;
+
+	time = get_time();
+	while ((get_time() - time) < ms)
+		usleep(5);
+}
+
+void	philo_print(char *str, t_philo *philo)
+{
+	t_philo	*tphilo;
+
+	tphilo = philo;
+	philo->actual_time = get_time();
+	pthread_mutex_lock(philo->main_philo->print_turn);
+	pthread_mutex_lock(philo->main_philo->died_print_m);
+	if (philo->main_philo->playing || (philo->status == DYING
+			&& philo->main_philo->died_printed != 1))
+	{
+		pthread_mutex_unlock(philo->main_philo->died_print_m);
+		printf(str, tphilo->actual_time
+			- philo->main_philo->initial_time, philo->id);
+		if (philo->status == DYING)
+		{
+			pthread_mutex_lock(philo->main_philo->died_print_m);
+			philo->main_philo->died_printed++;
+			pthread_mutex_unlock(philo->main_philo->died_print_m);
+		}
+	}
+	pthread_mutex_unlock(philo->main_philo->died_print_m);
+	pthread_mutex_unlock(philo->main_philo->print_turn);
 }

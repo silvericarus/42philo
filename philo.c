@@ -6,54 +6,11 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:31:42 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/04 21:04:54 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/08 20:20:21 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-long long	get_time(void)
-{
-	struct timeval	time;
-
-	gettimeofday(&time, NULL);
-	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
-}
-
-void	ft_usleep(long long ms)
-{
-	long long	time;
-
-	time = get_time();
-	while ((get_time() - time) < ms)
-		usleep(5);
-}
-
-void	philo_test(char *str, t_philo *philo)
-{
-	t_philo	*tphilo;
-	char	tmp[1];
-
-	tphilo = philo;
-	philo->actual_time = get_time();
-	pthread_mutex_lock(tphilo->main_philo->print_turn);
-	printf(str, tphilo->actual_time
-		- philo->main_philo->initial_time, tphilo->id, tphilo->status);
-	scanf("%s\n", tmp);
-	pthread_mutex_unlock(tphilo->main_philo->print_turn);
-}
-
-void	philo_print(char *str, t_philo *philo)
-{
-	t_philo	*tphilo;
-
-	tphilo = philo;
-	philo->actual_time = get_time();
-	pthread_mutex_lock(tphilo->main_philo->print_turn);
-	printf(str, tphilo->actual_time
-		- philo->main_philo->initial_time, tphilo->id);
-	pthread_mutex_unlock(tphilo->main_philo->print_turn);
-}
 
 void	*philo_main_loop(void *philo)
 {
@@ -65,8 +22,8 @@ void	*philo_main_loop(void *philo)
 	tphilo = philo;
 	tphilo->actual_time = 0;
 	die_alarm = get_time() + tphilo->main_philo->die_time;
-	(void) turns;
-	while (tphilo->main_philo->playing)
+	turns = 0;
+	while (tphilo->main_philo->playing && turns < tphilo->main_philo->turns)
 	{
 		if (!tphilo->left_fork.taken && !tphilo->right_fork.taken
 			&& tphilo->status == THINKING
@@ -94,6 +51,7 @@ void	*philo_main_loop(void *philo)
 			tphilo->right_fork.taken = 0;
 			ft_usleep(tphilo->main_philo->eat_time);
 			tphilo->status = SLEEPING;
+			turns++;
 		}
 		if (tphilo->status == SLEEPING)
 		{
@@ -116,10 +74,13 @@ void	*philo_main_loop(void *philo)
 		if (tphilo->actual_time > die_alarm)
 		{
 			tphilo->main_philo->playing = 0;
+			tphilo->status = DYING;
 			philo_print("%lld %d died\n", tphilo);
 		}
 		tphilo->actual_time = get_time();
 	}
+	ft_usleep(10);
+	ft_free(tphilo->main_philo);
 	return (NULL);
 }
 
@@ -147,24 +108,6 @@ void	*time_management(t_main *main)
 		i++;
 	}
 	return (NULL);
-}
-
-void	print_table(t_main *main)
-{
-	int	i;
-
-	i = 0;
-	printf("Time to die: %d, time to eat: %d, time to sleep: %d\n",
-		main->die_time, main->eat_time, main->sleep_time);
-	if (main->loop_mode)
-		printf("Times each philosopher must eat: %d\n", main->turns);
-	while (i < main->num_of_philos)
-	{
-		printf("Philosopher %d: left handed = %d & is in a %u status.\n",
-			main->table[i].id,
-			main->table[i].left_handed, main->table[i].status);
-		i++;
-	}
 }
 
 void	create_philos(t_main *main)
@@ -200,7 +143,15 @@ void	create_philos(t_main *main)
 		pthread_mutex_init(main->forks_mutexes[i].f_mutex, NULL);
 		i++;
 	}
+	main->died_printed = 0;
+	main->died_print_m = malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(main->died_print_m, NULL);
 	pthread_mutex_init(main->print_turn, NULL);
+}
+
+void	ft_leaks(void)
+{
+	system("leaks -q philo");
 }
 
 int	main(int args, char **argv)
@@ -213,9 +164,10 @@ int	main(int args, char **argv)
 		main.die_time = ft_atoi(argv[2]);
 		main.eat_time = ft_atoi(argv[3]);
 		main.sleep_time = ft_atoi(argv[4]);
-		if (main.num_of_philos < 1)
+		if (main.num_of_philos < 1 || main.num_of_philos > 200)
 		{
-			printf("There must be at least one philosopher\n");
+			printf("There must be at least one philosopher");
+			printf(" and no more than 200!!! >:(\n");
 			return (1);
 		}
 		if (args == 5)
@@ -228,6 +180,7 @@ int	main(int args, char **argv)
 			main.loop_mode = 1;
 			main.turns = ft_atoi(argv[5]);
 		}
+		atexit(ft_leaks);
 		main.table = malloc(main.num_of_philos * sizeof(t_philo));
 		main.forks_mutexes = malloc(main.num_of_philos
 				* sizeof(t_fork));

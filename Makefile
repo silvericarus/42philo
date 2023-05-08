@@ -11,7 +11,8 @@
 # **************************************************************************** #
 
 SRCS			= philo.c \
-				utils.c \
+					utils.c \
+					loop_split.c \
 
 OBJS			= $(SRCS:.c=.o)
 NAME			= philo

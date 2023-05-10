@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:31:42 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/08 20:20:21 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/10 21:59:39 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,18 +79,14 @@ void	*philo_main_loop(void *philo)
 		}
 		tphilo->actual_time = get_time();
 	}
-	ft_usleep(10);
-	ft_free(tphilo->main_philo);
 	return (NULL);
 }
 
 void	*time_management(t_main *main)
 {
 	t_main		*rmain;
-	int			turns;
 	int			i;
 
-	turns = 0;
 	rmain = main;
 	i = 0;
 	while (i < rmain->num_of_philos)
@@ -180,7 +176,6 @@ int	main(int args, char **argv)
 			main.loop_mode = 1;
 			main.turns = ft_atoi(argv[5]);
 		}
-		atexit(ft_leaks);
 		main.table = malloc(main.num_of_philos * sizeof(t_philo));
 		main.forks_mutexes = malloc(main.num_of_philos
 				* sizeof(t_fork));
@@ -189,5 +184,8 @@ int	main(int args, char **argv)
 		main.initial_time = get_time();
 		create_philos(&main);
 		time_management(&main);
+		ft_usleep(40);
+		ft_free(&main);
+		atexit(ft_leaks);
 	}
 }

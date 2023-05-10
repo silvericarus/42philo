@@ -23,10 +23,10 @@ COLOR_RED = \033[91m
 BOLD = \033[1m
 COLOR_NONE = \033[0m
 
-all: ascii $(NAME) info
+all: $(LFLAGS) ascii $(NAME) info
 
 %.o: %.c
-		$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)

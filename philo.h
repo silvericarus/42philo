@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:32:07 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/10 21:32:49 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/11 22:28:13 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 # include <limits.h>
 # include <pthread.h>
 # include <sys/time.h>
+# define RED "\033[91m"
+# define COLORNONE "\033[0m"
 
 typedef enum e_states
 {
@@ -44,7 +46,6 @@ typedef struct s_philo
 	t_states		status;
 	long long		start_eating;
 	long long		actual_time;
-	long long		time_since_last_meal;
 	pthread_t		thread;
 	struct s_main	*main_philo;
 }	t_philo;
@@ -74,5 +75,15 @@ void		ft_usleep(long long ms);
 void		philo_print(char *str, t_philo *philo);
 //loop_split.c
 void		ft_free(t_main *main);
-
+void		take_forks(t_philo *tphilo);
+void		sleep_and_think(t_philo *tphilo, long long *alarm,
+				long long *die_alarm);
+int			should_take_forks(t_philo *tphilo);
+void		handle_death(t_philo *tphilo);
+//loop_split_2.c
+void		finish_eating(t_philo *tphilo, long long *die_alarm, int *turns);
+int			loop_check(t_philo *tphilo, int *turns);
+void		initialize_fork_mutex(t_main *main, int index);
+void		initialize_philo(t_philo *philo, t_main *main, int index);
+int			initialize_main(t_main *main, int args, char **argv);
 #endif

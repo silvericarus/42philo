@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:31:42 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/11 22:28:26 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/12 18:57:09 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,11 +96,14 @@ int	main(int args, char **argv)
 
 	if (args == 5 || args == 6)
 	{
+		main.valid_arguments = 1;
+		if (check_arguments(args, argv, &main) != 0)
+			return (1);
 		if (initialize_main(&main, args, argv) != 0)
 			return (1);
 		create_philos(&main);
 		time_management(&main);
-		ft_usleep(40);
+		ft_usleep(800);
 		ft_free(&main);
 	}
 }

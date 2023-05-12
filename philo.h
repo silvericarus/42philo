@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:32:07 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/11 22:28:13 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/12 18:45:39 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,10 +65,11 @@ typedef struct s_main
 	long long			initial_time;
 	pthread_mutex_t		*died_print_m;
 	int					died_printed;
+	int					valid_arguments;
 }	t_main;
 
 //utils.c
-int			ft_atoi(const char *str);
+int			ft_atoi(const char *str, t_main *main);
 int			ft_isdigit(int str);
 long long	get_time(void);
 void		ft_usleep(long long ms);
@@ -86,4 +87,6 @@ int			loop_check(t_philo *tphilo, int *turns);
 void		initialize_fork_mutex(t_main *main, int index);
 void		initialize_philo(t_philo *philo, t_main *main, int index);
 int			initialize_main(t_main *main, int args, char **argv);
+//checks.c
+int			check_arguments(int args, char **argv, t_main *main);
 #endif

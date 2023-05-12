@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/24 19:10:06 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/08 19:32:15 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/12 19:40:38 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@ int	ft_isdigit(int str)
 	return (1);
 }
 
-int	ft_atoi(const char *str)
+int	ft_atoi(const char *str, t_main *main)
 {
-	int		i;
-	int		neg;
-	long	num;
+	int			i;
+	int			neg;
+	long long	num;
 
 	i = 0;
 	num = 0;
@@ -34,12 +34,12 @@ int	ft_atoi(const char *str)
 		neg *= -1;
 	if (str[i] == '-' || str[i] == '+')
 		i++;
-	while (ft_isdigit(str[i]))
+	while (str[i] != '\0')
 	{
-		if (num * neg > 2147483647)
-			return (-1);
-		else if (num * neg < -2147483648)
-			return (0);
+		if (!ft_isdigit(str[i]))
+			main->valid_arguments = 0;
+		if (num * neg > INT_MAX || num * neg < INT_MIN)
+			main->valid_arguments = 0;
 		else
 			num = num * 10 + (str[i] - '0');
 		i++;
@@ -61,7 +61,7 @@ void	ft_usleep(long long ms)
 
 	time = get_time();
 	while ((get_time() - time) < ms)
-		usleep(5);
+		usleep(10);
 }
 
 void	philo_print(char *str, t_philo *philo)

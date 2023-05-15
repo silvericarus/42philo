@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/12 17:53:22 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/12 18:45:26 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/15 20:35:36 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,4 +24,13 @@ int	check_arguments(int args, char **argv, t_main *main)
 		return (1);
 	else
 		return (0);
+}
+
+void	start_thinking(t_philo *philo)
+{
+	if (!philo->main_philo->printed_thinking)
+		philo_print("%lld %d is thinking\n", philo);
+	pthread_mutex_lock(philo->main_philo->printed_thinking_m);
+	philo->main_philo->printed_thinking = 1;
+	pthread_mutex_unlock(philo->main_philo->printed_thinking_m);
 }

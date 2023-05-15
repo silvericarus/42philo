@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:31:42 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/12 18:57:09 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/15 20:43:16 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,14 +27,14 @@ void	*philo_main_loop(void *philo)
 	{
 		if (should_take_forks(tphilo))
 			take_forks(tphilo);
-		else if (tphilo->left_fork.taken || tphilo->right_fork.taken)
-			tphilo->status = THINKING;
+		else if (tphilo->left_fork->taken || tphilo->right_fork->taken)
+			start_thinking(tphilo);
 		if (tphilo->status == EATING)
 			finish_eating(tphilo, &die_alarm, &turns);
 		if (tphilo->status == SLEEPING)
 			sleep_and_think(tphilo, &alarm, &die_alarm);
 		if (tphilo->status == THINKING && tphilo->main_philo->playing)
-			philo_print("%lld %d is thinking\n", tphilo);
+			start_thinking(tphilo);
 		if (tphilo->actual_time > die_alarm)
 			handle_death(tphilo);
 	}
@@ -73,15 +73,18 @@ void	create_philos(t_main *main)
 	i = 0;
 	while (i < main->num_of_philos)
 	{		
+		initialize_fork_mutex(main, i);
 		initialize_philo(&philo, main, i);
 		main->table[i] = philo;
-		initialize_fork_mutex(main, i);
 		i++;
 	}
 	main->died_printed = 0;
+	main->printed_thinking = 0;
 	main->died_print_m = malloc(sizeof(pthread_mutex_t));
+	main->printed_thinking_m = malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(main->died_print_m, NULL);
 	pthread_mutex_init(main->print_turn, NULL);
+	pthread_mutex_init(main->printed_thinking_m, NULL);
 }
 
 // void	ft_leaks(void)
@@ -103,7 +106,7 @@ int	main(int args, char **argv)
 			return (1);
 		create_philos(&main);
 		time_management(&main);
-		ft_usleep(800);
+		ft_usleep(400);
 		ft_free(&main);
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 19:34:38 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/12 19:37:12 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/15 20:34:43 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,11 @@ void	ft_free(t_main *main)
 void	take_forks(t_philo *tphilo)
 {
 	philo_print("%lld %d has taken a fork\n", tphilo);
-	pthread_mutex_lock(tphilo->left_fork.f_mutex);
-	tphilo->left_fork.taken = 1;
+	pthread_mutex_lock(tphilo->left_fork->f_mutex);
+	tphilo->left_fork->taken = 1;
 	philo_print("%lld %d has taken a fork\n", tphilo);
-	pthread_mutex_lock(tphilo->right_fork.f_mutex);
-	tphilo->right_fork.taken = 1;
+	pthread_mutex_lock(tphilo->right_fork->f_mutex);
+	tphilo->right_fork->taken = 1;
 	tphilo->status = EATING;
 }
 
@@ -55,12 +55,15 @@ void	sleep_and_think(t_philo *tphilo, long long *alarm, long long *die_alarm)
 		if (tphilo->actual_time > *die_alarm)
 			handle_death(tphilo);
 	}
+	pthread_mutex_lock(tphilo->main_philo->printed_thinking_m);
+	tphilo->main_philo->printed_thinking = 0;
+	pthread_mutex_unlock(tphilo->main_philo->printed_thinking_m);
 	tphilo->status = THINKING;
 }
 
 int	should_take_forks(t_philo *tphilo)
 {
-	return (!tphilo->left_fork.taken && !tphilo->right_fork.taken
+	return (!tphilo->left_fork->taken && !tphilo->right_fork->taken
 		&& tphilo->status == THINKING
 		&& tphilo->main_philo->num_of_philos > 1);
 }

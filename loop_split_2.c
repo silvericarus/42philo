@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 21:01:14 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/12 19:37:29 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/15 20:40:02 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,10 @@ void	finish_eating(t_philo *tphilo, long long *die_alarm, int *turns)
 		if (!tphilo->main_philo->playing)
 			break ;
 	}
-	pthread_mutex_unlock(tphilo->left_fork.f_mutex);
-	pthread_mutex_unlock(tphilo->right_fork.f_mutex);
-	tphilo->left_fork.taken = 0;
-	tphilo->right_fork.taken = 0;
+	pthread_mutex_unlock(tphilo->left_fork->f_mutex);
+	pthread_mutex_unlock(tphilo->right_fork->f_mutex);
+	tphilo->left_fork->taken = 0;
+	tphilo->right_fork->taken = 0;
 	tphilo->status = SLEEPING;
 	(*turns)++;
 }
@@ -52,7 +52,6 @@ int	loop_check(t_philo *tphilo, int *turns)
 void	initialize_fork_mutex(t_main *main, int index)
 {
 	main->forks_mutexes[index].f_mutex = malloc(sizeof(pthread_mutex_t));
-	main->forks_mutexes[index].order = index;
 	main->forks_mutexes[index].taken = 0;
 	pthread_mutex_init(main->forks_mutexes[index].f_mutex, NULL);
 }
@@ -72,10 +71,12 @@ void	initialize_philo(t_philo *philo, t_main *main, int index)
 	philo->id = index + 1;
 	philo->main_philo = (struct s_main *)main;
 	philo->main_philo->forks_mutexes[index].f_mutex
-		= malloc(sizeof(pthread_mutex_t *));
-	philo->start_eating = get_time();
-	philo->left_fork = main->forks_mutexes[index];
-	philo->right_fork = main->forks_mutexes[index % main->num_of_philos];
+		= malloc(sizeof(pthread_mutex_t));
+	philo->left_fork = &main->forks_mutexes[index];
+	if (index != main->num_of_philos)
+		philo->right_fork = &main->forks_mutexes[index + 1];
+	else
+		philo->right_fork = &main->forks_mutexes[0];
 }
 
 int	initialize_main(t_main *main, int args, char **argv)

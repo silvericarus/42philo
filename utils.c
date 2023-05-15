@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/24 19:10:06 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/12 19:40:38 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/15 20:39:32 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ void	ft_usleep(long long ms)
 
 	time = get_time();
 	while ((get_time() - time) < ms)
-		usleep(10);
+		usleep(100);
 }
 
 void	philo_print(char *str, t_philo *philo)

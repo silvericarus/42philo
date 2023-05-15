@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:32:07 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/12 18:45:39 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/15 20:32:32 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,10 +41,9 @@ typedef struct s_philo
 {
 	int				id;
 	int				left_handed;
-	t_fork			left_fork;
-	t_fork			right_fork;
+	t_fork			*left_fork;
+	t_fork			*right_fork;
 	t_states		status;
-	long long		start_eating;
 	long long		actual_time;
 	pthread_t		thread;
 	struct s_main	*main_philo;
@@ -66,6 +65,8 @@ typedef struct s_main
 	pthread_mutex_t		*died_print_m;
 	int					died_printed;
 	int					valid_arguments;
+	int					printed_thinking;
+	pthread_mutex_t		*printed_thinking_m;
 }	t_main;
 
 //utils.c
@@ -89,4 +90,5 @@ void		initialize_philo(t_philo *philo, t_main *main, int index);
 int			initialize_main(t_main *main, int args, char **argv);
 //checks.c
 int			check_arguments(int args, char **argv, t_main *main);
+void		start_thinking(t_philo *philo);
 #endif

@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 21:01:14 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/15 20:40:02 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/16 20:41:47 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,27 +19,26 @@ void	finish_eating(t_philo *tphilo, long long *die_alarm, int *turns)
 	eat_alarm = get_time() + tphilo->main_philo->eat_time;
 	*die_alarm = get_time() + tphilo->main_philo->die_time;
 	philo_print("%lld %d is eating\n", tphilo);
-	while (tphilo->actual_time <= eat_alarm)
-	{
-		ft_usleep(100);
-		tphilo->actual_time = get_time();
-		if (!tphilo->main_philo->playing)
-			break ;
-	}
+	ft_usleep(100);
+	tphilo->actual_time = get_time();
 	pthread_mutex_unlock(tphilo->left_fork->f_mutex);
 	pthread_mutex_unlock(tphilo->right_fork->f_mutex);
+	pthread_mutex_lock(tphilo->main_philo->printed_thinking_m);
+	tphilo->main_philo->printed_thinking = 0;
+	pthread_mutex_unlock(tphilo->main_philo->printed_thinking_m);
 	tphilo->left_fork->taken = 0;
 	tphilo->right_fork->taken = 0;
 	tphilo->status = SLEEPING;
 	(*turns)++;
 }
 
-int	loop_check(t_philo *tphilo, int *turns)
+int	loop_check(t_philo *tphilo, int *turns, long long *die_alarm)
 {
 	int	tmp;
 
 	tmp = (*turns);
-	tphilo->actual_time = get_time();
+	if (tphilo->actual_time >= *die_alarm)
+		handle_death(tphilo);
 	if (tphilo->main_philo->loop_mode)
 	{	
 		return (tphilo->main_philo->playing
@@ -70,10 +69,8 @@ void	initialize_philo(t_philo *philo, t_main *main, int index)
 	}
 	philo->id = index + 1;
 	philo->main_philo = (struct s_main *)main;
-	philo->main_philo->forks_mutexes[index].f_mutex
-		= malloc(sizeof(pthread_mutex_t));
 	philo->left_fork = &main->forks_mutexes[index];
-	if (index != main->num_of_philos)
+	if (index != (main->num_of_philos - 1))
 		philo->right_fork = &main->forks_mutexes[index + 1];
 	else
 		philo->right_fork = &main->forks_mutexes[0];

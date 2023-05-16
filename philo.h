@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:32:07 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/15 20:32:32 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/16 18:40:09 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,17 +78,17 @@ void		philo_print(char *str, t_philo *philo);
 //loop_split.c
 void		ft_free(t_main *main);
 void		take_forks(t_philo *tphilo);
-void		sleep_and_think(t_philo *tphilo, long long *alarm,
-				long long *die_alarm);
+void		sleep_and_think(t_philo *tphilo, long long *die_alarm);
 int			should_take_forks(t_philo *tphilo);
 void		handle_death(t_philo *tphilo);
 //loop_split_2.c
 void		finish_eating(t_philo *tphilo, long long *die_alarm, int *turns);
-int			loop_check(t_philo *tphilo, int *turns);
+int			loop_check(t_philo *tphilo, int *turns, long long *die_alarm);
 void		initialize_fork_mutex(t_main *main, int index);
 void		initialize_philo(t_philo *philo, t_main *main, int index);
 int			initialize_main(t_main *main, int args, char **argv);
 //checks.c
 int			check_arguments(int args, char **argv, t_main *main);
-void		start_thinking(t_philo *philo);
+void		start_thinking(t_philo *philo, long long *die_alarm);
+void		print_table_data(t_main *main);
 #endif

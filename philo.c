@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/18 12:31:42 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/15 20:43:16 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/16 20:42:46 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,27 +16,24 @@ void	*philo_main_loop(void *philo)
 {
 	t_philo		*tphilo;
 	int			turns;
-	long long	alarm;
 	long long	die_alarm;
 
 	tphilo = philo;
 	tphilo->actual_time = 0;
 	die_alarm = get_time() + tphilo->main_philo->die_time;
 	turns = 0;
-	while (loop_check(tphilo, &turns))
+	while (loop_check(tphilo, &turns, &die_alarm))
 	{
 		if (should_take_forks(tphilo))
 			take_forks(tphilo);
 		else if (tphilo->left_fork->taken || tphilo->right_fork->taken)
-			start_thinking(tphilo);
+			tphilo->status = THINKING;
 		if (tphilo->status == EATING)
 			finish_eating(tphilo, &die_alarm, &turns);
 		if (tphilo->status == SLEEPING)
-			sleep_and_think(tphilo, &alarm, &die_alarm);
+			sleep_and_think(tphilo, &die_alarm);
 		if (tphilo->status == THINKING && tphilo->main_philo->playing)
-			start_thinking(tphilo);
-		if (tphilo->actual_time > die_alarm)
-			handle_death(tphilo);
+			start_thinking(tphilo, &die_alarm);
 	}
 	return (NULL);
 }

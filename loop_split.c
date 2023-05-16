@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 19:34:38 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/15 20:34:43 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/16 20:38:08 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,21 @@ void	ft_free(t_main *main)
 	int	i;
 
 	i = 0;
-	free(main->print_turn);
-	free(main->died_print_m);
 	pthread_mutex_destroy(main->print_turn);
 	pthread_mutex_destroy(main->died_print_m);
+	pthread_mutex_destroy(main->printed_thinking_m);
+	free(main->print_turn);
+	free(main->died_print_m);
+	free(main->printed_thinking_m);
 	while (i < main->num_of_philos)
 	{
 		pthread_mutex_destroy(main->forks_mutexes[i].f_mutex);
 		free(main->forks_mutexes[i].f_mutex);
+		pthread_kill(main->table[i].thread, 9);
 		i++;
 	}
 	free(main->forks_mutexes);
+	free(main->table);
 }
 
 void	take_forks(t_philo *tphilo)
@@ -41,23 +45,21 @@ void	take_forks(t_philo *tphilo)
 	tphilo->status = EATING;
 }
 
-void	sleep_and_think(t_philo *tphilo, long long *alarm, long long *die_alarm)
+void	sleep_and_think(t_philo *tphilo, long long *die_alarm)
 {
+	long long	alarm;
+
 	if (tphilo->main_philo->playing)
 		philo_print("%lld %d is sleeping\n", tphilo);
-	*alarm = get_time() + tphilo->main_philo->sleep_time;
-	while (tphilo->actual_time <= *alarm)
+	alarm = get_time() + tphilo->main_philo->sleep_time;
+	while (tphilo->actual_time <= alarm
+		&& tphilo->main_philo->playing)
 	{
 		ft_usleep(100);
 		tphilo->actual_time = get_time();
-		if (!tphilo->main_philo->playing)
-			break ;
-		if (tphilo->actual_time > *die_alarm)
+		if (tphilo->actual_time >= *die_alarm)
 			handle_death(tphilo);
 	}
-	pthread_mutex_lock(tphilo->main_philo->printed_thinking_m);
-	tphilo->main_philo->printed_thinking = 0;
-	pthread_mutex_unlock(tphilo->main_philo->printed_thinking_m);
 	tphilo->status = THINKING;
 }
 

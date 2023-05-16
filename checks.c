@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/12 17:53:22 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/15 20:35:36 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/16 18:29:13 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,37 @@ int	check_arguments(int args, char **argv, t_main *main)
 		return (0);
 }
 
-void	start_thinking(t_philo *philo)
+void	start_thinking(t_philo *philo, long long *die_alarm)
 {
+	long long	think_alarm;
+
+	think_alarm = get_time() + 100;
 	if (!philo->main_philo->printed_thinking)
 		philo_print("%lld %d is thinking\n", philo);
 	pthread_mutex_lock(philo->main_philo->printed_thinking_m);
 	philo->main_philo->printed_thinking = 1;
 	pthread_mutex_unlock(philo->main_philo->printed_thinking_m);
+	while (philo->actual_time <= think_alarm
+		&& philo->main_philo->playing)
+	{
+		philo->actual_time = get_time();
+		if (philo->actual_time >= *die_alarm)
+			handle_death(philo);
+		if (should_take_forks(philo))
+			break ;
+	}
+}
+
+void	print_table_data(t_main *main)
+{
+	int	i;
+
+	i = 0;
+	while (i < main->num_of_philos)
+	{
+		printf("philo id:%d has left fork %d and right fork %d\n",
+			main->table[i].id, main->table[i].left_fork->order,
+			main->table[i].right_fork->order);
+		i++;
+	}
 }

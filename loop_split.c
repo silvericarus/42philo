@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 19:34:38 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/16 20:38:08 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/17 18:29:02 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ void	ft_free(t_main *main)
 	{
 		pthread_mutex_destroy(main->forks_mutexes[i].f_mutex);
 		free(main->forks_mutexes[i].f_mutex);
-		pthread_kill(main->table[i].thread, 9);
 		i++;
 	}
 	free(main->forks_mutexes);

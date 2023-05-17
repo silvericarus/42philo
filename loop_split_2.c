@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 21:01:14 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/16 20:41:47 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/17 18:56:57 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,14 @@ void	finish_eating(t_philo *tphilo, long long *die_alarm, int *turns)
 	eat_alarm = get_time() + tphilo->main_philo->eat_time;
 	*die_alarm = get_time() + tphilo->main_philo->die_time;
 	philo_print("%lld %d is eating\n", tphilo);
-	ft_usleep(100);
-	tphilo->actual_time = get_time();
+	while (tphilo->actual_time <= eat_alarm
+		&& tphilo->main_philo->playing)
+	{
+		ft_usleep(eat_alarm);
+		tphilo->actual_time = get_time();
+		if (tphilo->actual_time >= *die_alarm)
+			handle_death(tphilo);
+	}
 	pthread_mutex_unlock(tphilo->left_fork->f_mutex);
 	pthread_mutex_unlock(tphilo->right_fork->f_mutex);
 	pthread_mutex_lock(tphilo->main_philo->printed_thinking_m);

@@ -6,7 +6,7 @@
 /*   By: albgonza <albgonza@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 19:34:38 by albgonza          #+#    #+#             */
-/*   Updated: 2023/05/17 18:29:02 by albgonza         ###   ########.fr       */
+/*   Updated: 2023/05/18 18:09:10 by albgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ void	sleep_and_think(t_philo *tphilo, long long *die_alarm)
 	while (tphilo->actual_time <= alarm
 		&& tphilo->main_philo->playing)
 	{
-		ft_usleep(100);
 		tphilo->actual_time = get_time();
 		if (tphilo->actual_time >= *die_alarm)
 			handle_death(tphilo);
